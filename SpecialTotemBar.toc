@@ -1,0 +1,9 @@
+## Interface: 80100
+## Title: SpecialTotemBar
+## Notes: Create TotemActionBar for Special Spell Settting
+## Notes-zhCN: 对特殊设置的技能提供图腾动作条进行监控
+## Author: HopeAsd
+## Version: 2.0
+## SavedVariables: SpecialTotemBarConfig
+
+init.xml
