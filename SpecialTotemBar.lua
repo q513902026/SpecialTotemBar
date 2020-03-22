@@ -282,7 +282,7 @@ function ns:GetSpellCooldown(spell)
     end
     local startTime, duration = start, dur
     if charges == maxCharges then
-        start, dur = 0, 0
+        startTime, duration = 0, 0
         startCharges, durCharges = 0, 0
     elseif charges > 0 then
         startTime, duration = startCharges, durCharges
