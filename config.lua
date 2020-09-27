@@ -38,18 +38,23 @@ local watchOrderSpell = {
         [4] = 5394 -- 治疗之泉图腾
     }
 }
-C.watchOrderSpell = watchOrderSpell
+local function resettingSpellList()
+    C.watchOrderSpell = {}
+    F:initSettings(watchOrderSpell,C.watchOrderSpell)
+end
+
 
 function C:UpdateWatchedSpellList()
+    resettingSpellList()
     local talents = C:GetWatchTalents()
     local spells = C:GetWatchSpells()
     for k,v in pairs(talents) do 
         if v.learn then
+            tinsert(C.watchOrderSpell[self.db.spec],v.spell)
             if v.replace or v.passive then
-                F:RemoveArrayValue(spells,v.spell)
-                break 
+                F:RemoveArrayValue(C.watchOrderSpell[self.db.spec],v.spell)
             end
-            spells[#spells+1] = v.spell
+            
         end
     end
 end

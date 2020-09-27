@@ -7,7 +7,7 @@ local MAX_TOTEMS = MAX_TOTEMS
 
 local HiddenFrame = CreateFrame("Frame")
 HiddenFrame:Hide()
-local mainFrame = CreateFrame("Frame",nil,UIParent)
+local mainFrame = CreateFrame("Frame","SpecialTotemMainBar",UIParent)
 local function CreateButton(index)
     local spell = F:GetActiveSpellName(C:GetWatchSpell(index))
     local frame = F:ActionButtonAcquire(index,mainFrame,spell,C:IsPet(index))
@@ -39,15 +39,20 @@ local function CreateButtons()
             if i == 1 then
                 frame:SetPoint("LEFT",mainFrame)
             else
-                frame:SetPoint("LEFT",frames[i-1],"RIGHT",C.config.speacing,0)
+                frame:SetPoint("LEFT",frames[i-1],"RIGHT",C.config.spacing,0)
             end
+            
+            F:FireCallback(frames,"CUSTOM_CREATEBUTTON_SETPOINT",frame,i)
             frame:Show()
             frames[i] = frame
         end
     end
 end
+
+
 local state = {}
 local function CreateTotem(frame,slot)
+    if frame.isPet then slot = 20 - slot end
     return F:TotemButtonAcquire(frame,slot)
 end
 
@@ -125,7 +130,7 @@ local function UpdatePet(self,event,unit)
                         if frame.aura then
                             frame.totem:Show()
                             C_Timer.After(0.1,function()
-                                F:FireCallback(frame,"CUSTOM_SPELL_DURATION_END")
+                                    F:FireCallback(frame,"CUSTOM_SPELL_DURATION_END_PET")
                             end)
                         end
                         if duration == 0 and startTime == 0 then
@@ -162,16 +167,25 @@ F:RegisterCallback("CUSTOM_SPELL_DURATION_START",function(self,event,start,dur)
     self:SetAlpha(C.config.AuraAlpha)
 end)
 F:RegisterCallback("CUSTOM_SPELL_DURATION_END",function(self,event)
-    self:SetAlpha(C.config.CDAlpha)
+        self:SetAlpha(C.config.CDAlpha)
         self.CD:SetCooldown(0,0)
         self.aura = false
         F:UpdateCooldown(self)
         if self.totem then self.totem:Hide() end
-        if not  C.config.showSpellCD then
+        if not C.config.showSpellCD then
             self.CD:Hide()
         end
-
 end)
+F:RegisterCallback("CUSTOM_SPELL_DURATION_END_PET",function(self,event)
+    if not UnitExists("pet") then
+        self.aura = false
+        self:SetAlpha(C.config.CDAlpha)
+        self.CD:SetCooldown(0,0)
+        F:UpdateCooldown(self)
+        self.totem:Hide()
+    end
+end)
+
 local function UpdateMainFramePos(self)
     self:ClearAllPoints()
     local pos = C:VARGET("pos")
@@ -184,9 +198,10 @@ local function init(self)
 
     C:UpdateTalent()
     CreateButtons()
-
-    mainFrame:SetSize(C.config.iconSize * 4 + C.config.spacing * 4,C.config.iconSize)
+    local watchSpell = C:GetWatchSpells()
+    mainFrame:SetSize((C.config.iconSize + C.config.spacing )* #watchSpell ,C.config.iconSize)
     F:FireCallback(mainFrame,"CUSTOM_MAINFRAME_CREATE")
+    F:FireCallback(mainFrame,"CUSTOM_MAINFRAME_SIZE_UPDATE",mainFrame:GetSize())
     
     UpdateMainFramePos(mainFrame)
 
@@ -195,6 +210,9 @@ local function init(self)
     F:RegisterCallback("PLAYER_TALENT_UPDATE",function() 
         C:UpdateTalent()
         CreateButtons()
+        local watchSpell = C:GetWatchSpells()
+        mainFrame:SetSize((C.config.iconSize + C.config.spacing )* #watchSpell ,C.config.iconSize)
+        F:FireCallback(mainFrame,"CUSTOM_MAINFRAME_SIZE_UPDATE",mainFrame:GetSize())
     end)
 
     F:RegisterCallback("CUSTOM_COOLDOWN_UPDATE",UpdateCooldown)

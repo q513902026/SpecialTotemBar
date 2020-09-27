@@ -61,4 +61,7 @@ F:RegisterCallback("CUSTOM_MOVER_Hide",function(self)
 end)
 F:RegisterCallback("CUSTOM_MAINFRAME_CREATE",init)
 
+F:RegisterCallback("CUSTOM_MAINFRAME_SIZE_UPDATE",function(self,_,width,height)
+    self.mover:SetSize(width,height)
+end)
 

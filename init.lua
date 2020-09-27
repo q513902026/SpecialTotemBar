@@ -14,7 +14,7 @@ function F:IsLoaded()
 end
 
 function F:RemoveArrayValue(tbl,value)
-    for i = #tbl,-1 do 
+    for i = #tbl,1,-1 do 
         if tbl[i] == value then
             tremove(tbl,i)
         end
