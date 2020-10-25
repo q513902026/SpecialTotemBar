@@ -37,7 +37,7 @@ local function CreateButtons()
         F:TotemButtonAcquire(HiddenFrame,i)
         if frame then
             if i == 1 then
-                frame:SetPoint("LEFT",mainFrame)
+                frame:SetPoint("LEFT",mainFrame,C.config.spacing/2,0)
             else
                 frame:SetPoint("LEFT",frames[i-1],"RIGHT",C.config.spacing,0)
             end
@@ -51,6 +51,8 @@ end
 
 
 local state = {}
+function ns:GetStates() return state end
+
 local function CreateTotem(frame,slot)
     if frame.isPet then slot = 20 - slot end
     return F:TotemButtonAcquire(frame,slot)
@@ -58,7 +60,7 @@ end
 
 local function UpdateTotemTable()
     local s = state
-    for i =1,MAX_TOTEMS do 
+    for i =1, MAX_TOTEMS do 
         local haveToten,name,start,duration,icon = GetTotemInfo(i)
         local frameTotem = _G["TotemFrameTotem" .. i]
         if not s[i] then
@@ -82,12 +84,13 @@ local function UpdateTotem(_,_,slot)
         if v.lastname ~= "" or v.name ~= "" then 
             for i,frame in pairs(frames) do 
                 if frame.isPet == false then 
-                    if v.dur > 0 then 
+                    if v.dur > 0 then
+                        if not v.name then v.name = v.lastname end
                         if v.name ~= "" and (v.name:find(frame.spell) or frame.spell:find(v.name)) then 
                             local totem = v.btnFunc(frame,v.slot)
                             frame.totem = totem
                             F:FireCallback(frame,"CUSTOM_SPELL_DURATION_START",v.start,v.dur)
-                            break
+                            break --跳出循环
                         end
                     else
                         if frame.totem and v.lastname ~="" and (v.lastname:find(frame.spell) or frame.spell:find(v.lastname)) then
@@ -152,7 +155,9 @@ local function UpdateCooldown()
                 v.totem:Show()
             end
         end
-        if v.aura == false then
+        -- TRY FIX TOTEM DURATION ERROR
+        local startTime,duration = v.CD:GetCooldownTimes()
+        if v.aura == false or duration <=0 then
             F:UpdateCooldown(v)
         end
 
