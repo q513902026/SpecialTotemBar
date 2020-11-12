@@ -51,8 +51,7 @@ end
 
 
 local state = {}
-function ns:GetStates() return state end
-
+ns.states = state
 local function CreateTotem(frame,slot)
     if frame.isPet then slot = 20 - slot end
     return F:TotemButtonAcquire(frame,slot)

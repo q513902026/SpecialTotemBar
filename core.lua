@@ -8,19 +8,6 @@ local function UpdateMulti()
     local scale = UIParent:GetScale()
     return fixedHeight / scale
 end
-function F:initSettings(source, target)
-    for i, j in pairs(source) do
-        if type(j) == "table" then
-            if target[i] == nil then target[i] = {} end
-            for k, v in pairs(j) do
-                if target[i][k] == nil then target[i][k] = v end
-            end
-        else
-            if target[i] == nil then target[i] = j end
-        end
-    end
-    for i in pairs(target) do if source[i] == nil then target[i] = nil end end
-end
 
 function F:CreateText(font, fontSize, justifyh)
     if self.Text then return end
@@ -78,6 +65,8 @@ function F:GetActionButtonFrame(name, parent)
     end
     local button = CreateFrame("Button", name, parent, "SecureActionButtonTemplate")
     button:RegisterForClicks("AnyUp")
+    button:SetHighlightTexture([[Interface\Buttons\ButtonHilight-Square]],"ADD")
+    button:SetPushedTexture([[Interface\Buttons\UI-Quickslot-Depress]])
     
     actionButtonPool[name] = button
     return button
@@ -133,6 +122,8 @@ function F.GetSpellCooldown(spell)
     local charges, maxCharges, startCharges, durCharges = GetSpellCharges(spell);
 
     local stack = charges or GetSpellCount(spell)
+
+    
     local gcd = math.max((1.5 / (1 + (UnitSpellHaste("player") / 100))), 0.75)
 
     start = start or 0
@@ -160,31 +151,26 @@ end
 function F:UpdateCooldown(frame)
     if not frame then return end 
     if not frame.spell then return end
-    local stack,_,start,duration = F.GetSpellCooldown(frame.spell)
+    local stack,maxStack,start,duration = F.GetSpellCooldown(frame.spell)
     if frame.Text then
         if stack and stack > 0 then
-            frame.Text:SetText(stack)
+            if maxStack > 1 then
+                frame.Text:SetText(stack)
+            else
+                frame.Text:SetText("")
+            end
         else
             frame.Text:SetText("")
         end
     end
     if frame.CD then
-        frame.CD:SetCooldown(start,duration)
+        local gcdstart, gcdduration = GetSpellCooldown(61304)
+        if gcdstart>0 and gcdduration>0 then
+        else
+            frame.CD:SetCooldown(start,duration)
+        end
     end
     return true
 end
 
-function F.registerCMD(key, cmd, callback) 
-    key = key:upper() 
-    if type(callback) == "function" then 
-        if type(cmd) == "string" then 
-            _G["SLASH_" .. key .. "1"] = "/"..cmd 
-        elseif type(cmd) == "table" then 
-            for i, v in pairs(cmd) do 
-                _G["SLASH_" .. key .. i] = "/"..cmd[i] 
-            end 
-        end 
-        SlashCmdList[key] = callback 
-    end 
-end
 

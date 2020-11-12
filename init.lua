@@ -55,6 +55,34 @@ function F:UnregisterCallback(event,callback)
     end
 end
 
+function F:initSettings(source, target)
+    for i, j in pairs(source) do
+        if type(j) == "table" then
+            if target[i] == nil then target[i] = {} end
+            for k, v in pairs(j) do
+                if target[i][k] == nil then target[i][k] = v end
+            end
+        else
+            if target[i] == nil then target[i] = j end
+        end
+    end
+    for i in pairs(target) do if source[i] == nil then target[i] = nil end end
+end
+
+function F.registerCMD(key, cmd, callback) 
+    key = key:upper() 
+    if type(callback) == "function" then 
+        if type(cmd) == "string" then 
+            _G["SLASH_" .. key .. "1"] = "/"..cmd 
+        elseif type(cmd) == "table" then 
+            for i, v in pairs(cmd) do 
+                _G["SLASH_" .. key .. i] = "/"..cmd[i] 
+            end 
+        end 
+        SlashCmdList[key] = callback 
+    end 
+end
+
 F:RegisterCallback("ADDON_LOADED",function(self,_,addon)
     if addon == addonName then
         F:FireCallback(ns,"CUSTOM_ADDON_PRELOAD")
@@ -68,6 +96,7 @@ F:RegisterCallback("PLAYER_ENTERING_WORLD",function(self,_,isInitialLogin, isRel
         F:FireCallback(ns,"CUSTOM_ADDON_POSTLOAD")
     end
 end)
+
 
 local _, class = UnitClass("player")
 loaded = (class == "SHAMAN")

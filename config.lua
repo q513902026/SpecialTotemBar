@@ -35,7 +35,9 @@ local watchOrderSpell = {
         [1] = 198103, -- 土元素
         [2] = 98008, -- 灵魂链接
         [3] = 108280, -- 治疗之潮
-        [4] = 5394 -- 治疗之泉图腾
+        [4] = 5394, -- 治疗之泉图腾
+        [5] = 16191, -- 法力之潮图腾
+        [6] = 192058, -- 电能图腾
     }
 }
 local function resettingSpellList()
@@ -107,7 +109,7 @@ function C:UpdateTalent()
 end
 function C:GetWatchTalentInfo(spell)
     self.db.spec = GetSpecialization() or 0
-    if self.db.spec < GetNumSpecializations() then
+    if self.db.spec <= GetNumSpecializations() then
         local talents = watchTalents[self.db.spec]
         for k,v in pairs(talents) do
             local name = F:GetActiveSpellName(spell,false)
@@ -146,7 +148,7 @@ function C:IsPet(index)
     for k ,v in pairs(PetDuration) do 
         local watchName = F:GetActiveSpellName(k)
         local watchSpecialTalent = C:GetWatchTalentInfo(117013)
-        if watchName == name and watchSpecialTalent.learn  then
+        if watchName == name and watchSpecialTalent and watchSpecialTalent.learn  then
             return true
         end
     end
@@ -160,6 +162,7 @@ F:RegisterCallback("CUSTOM_ADDON_PRELOAD", function(self)
     if not SpecialTotemBarConfig then SpecialTotemBarConfig = {} end
     F:initSettings(defaultConfig, SpecialTotemBarConfig)
     C.db.var = SpecialTotemBarConfig
+    resettingSpellList()
 end)
 function C:VARGET(key) return self.db.var[key] end
 function C:VARSET(key,value) SpecialTotemBarConfig[key] = value end
