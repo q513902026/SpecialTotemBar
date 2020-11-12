@@ -89,7 +89,7 @@ local PetDuration = {
 }
 function C:UpdateTalent()
     self.db.spec = GetSpecialization() or 0
-    if self.db.spec < GetNumSpecializations() and self.db.spec > 0 then
+    if self.db.spec <= GetNumSpecializations() and self.db.spec > 0 then
         local talents = watchTalents[self.db.spec]
         for k,v in pairs(talents) do 
             local tier,column = strsplit(":",k)
